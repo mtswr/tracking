@@ -1,85 +1,146 @@
 import React from "react";
 import {
-  Text,
-  Link,
-  HStack,
   Center,
-  Heading,
-  Switch,
-  useColorMode,
   NativeBaseProvider,
   extendTheme,
-  VStack,
-  Box,
+  Fab,
+  Icon,
+  Modal,
+  FormControl,
+  Input,
+  Button,
+  ZStack,
+  Heading,
+  StatusBar,
+  Flex,
 } from "native-base";
-import NativeBaseIcon from "./components/NativeBaseIcon";
-import { Platform } from "react-native";
 
-// Define the config
+import { FlatList } from "react-native";
+
+import { AntDesign } from "@expo/vector-icons";
+import { AppBar } from "./components/AppBar";
+import { OrderCard } from "./components/OrderCard";
+
 const config = {
   useSystemColorMode: false,
   initialColorMode: "dark",
 };
 
-// extend the theme
-export const theme = extendTheme({ config });
+const fonts = {
+  200: {
+    normal: 'Roboto-Light',
+    italic: 'Roboto-LightItalic',
+  },
+  500: {
+    normal: 'Roboto-Medium',
+  },
+};
+
+export const theme = extendTheme({ config, fonts });
 
 export default function App() {
-  return (
-    <NativeBaseProvider>
-      <Center
-        _dark={{ bg: "blueGray.900" }}
-        _light={{ bg: "blueGray.50" }}
-        px={4}
-        flex={1}
-      >
-        <VStack space={5} alignItems="center">
-          <NativeBaseIcon />
-          <Heading size="lg">Welcome to NativeBase</Heading>
-          <HStack space={2} alignItems="center">
-            <Text>Edit</Text>
-            <Box
-              _web={{
-                _text: {
-                  fontFamily: "monospace",
-                  fontSize: "sm",
-                },
-              }}
-              px={2}
-              py={1}
-              _dark={{ bg: "blueGray.800" }}
-              _light={{ bg: "blueGray.200" }}
-            >
-              App.js
-            </Box>
-            <Text>and save to reload.</Text>
-          </HStack>
-          <Link href="https://docs.nativebase.io" isExternal>
-            <Text color="primary.500" underline fontSize={"xl"}>
-              Learn NativeBase
-            </Text>
-          </Link>
-          <ToggleDarkMode />
-        </VStack>
-      </Center>
-    </NativeBaseProvider>
-  );
-}
+  const [modalVisible, setModalVisible] = React.useState(false);
+  const initialRef = React.useRef(null);
 
-// Color Switch Component
-function ToggleDarkMode() {
-  const { colorMode, toggleColorMode } = useColorMode();
+  const OrdersFakeData = [
+    {
+      id: 1,
+      name: "Iphone x",
+      description: "Seu item foi enviado para fortaleza",
+      lastUpdate: "Ultima atualizacao as 14 de junho",
+    },
+    {
+      id: 2,
+      name: "Presente da amiga",
+      description: "Seu item chegou em curitiba",
+      lastUpdate: "18:00",
+    },
+    {
+      id: 3,
+      name: "Carregador do celular",
+      description: "Your order is in curitiba",
+      lastUpdate: "Ultima atualizacao as 18:00",
+    },
+  ];
+
   return (
-    <HStack space={2} alignItems="center">
-      <Text>Dark</Text>
-      <Switch
-        isChecked={colorMode === "light"}
-        onToggle={toggleColorMode}
-        aria-label={
-          colorMode === "light" ? "switch to dark mode" : "switch to light mode"
-        }
-      />
-      <Text>Light</Text>
-    </HStack>
+    <NativeBaseProvider theme={theme}>
+      <ZStack>
+        <AppBar />
+      </ZStack>
+      <Flex
+        _dark={{ bg: "coolGray.800" }}
+        _light={{ bg: "light.200" }}
+        flex={1}
+        style={{
+          width: "100%",
+          height: "100%",
+        }}
+        p={2}
+      >
+        <FlatList
+          showsVerticalScrollIndicator={false}
+          data={OrdersFakeData}
+          refreshing={false}
+          renderItem={({ item }) => (
+            <OrderCard
+              name={item.name}
+              description={item.description}
+              lastUpdate={item.lastUpdate}
+              onPressDelete={() => {
+                console.log("Delete");
+              }}
+            />
+          )}
+        />
+
+        <Fab
+          renderInPortal={false}
+          shadow={2}
+          size="lg"
+          icon={<Icon color="black" as={AntDesign} name="plus" size="sm" />}
+          onPress={() => setModalVisible(true)}
+        />
+      </Flex>
+      <Modal
+        isOpen={modalVisible}
+        onClose={() => setModalVisible(false)}
+        initialFocusRef={initialRef}
+      >
+        <Modal.Content
+          style={{
+            width: "100%",
+            height: "50%",
+          }}
+        >
+          <Modal.CloseButton />
+          <Modal.Header>Adicionar</Modal.Header>
+          <Modal.Body>
+            <FormControl>
+              <FormControl.Label>Nome</FormControl.Label>
+              <Input />
+            </FormControl>
+            <FormControl mt="3">
+              <FormControl.Label>Codigo de rastreamento</FormControl.Label>
+              <Input />
+            </FormControl>
+          </Modal.Body>
+          <Modal.Footer>
+            <Button.Group space={2}>
+              <Button variant="ghost" colorScheme="blueGray" onPress={() => {
+                setModalVisible(false);
+              }}>
+                Cancel
+              </Button>
+              <Button onPress={() => {
+                setModalVisible(false);
+              }}>
+                Save
+              </Button>
+            </Button.Group>
+          </Modal.Footer>
+        </Modal.Content>
+      </Modal>
+    </NativeBaseProvider >
   );
 }
